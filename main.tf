@@ -105,7 +105,7 @@ resource "azurerm_linux_virtual_machine" "my_terraform_vm" {
 
   source_image_reference {
     publisher = "Canonical"
-    offer     = "UbuntuServer"
+    offer     = "0001-com-ubuntu-server-focal"
     sku       = "20_04-lts"
     version   = "latest"
   }
@@ -124,16 +124,15 @@ resource "azurerm_linux_virtual_machine" "my_terraform_vm" {
 }
 
 resource "azurerm_virtual_machine_extension" "test-docker-installation" {
-  resource_group_name  = "${azurerm_resource_group.my_terraform_vm.name}"
-  virtual_machine_name = "${azurerm_virtual_machine.my_terraform_vm.name}"
+  virtual_machine_id   = azurerm_linux_virtual_machine.my_terraform_vm.id
+  name                 = "Installing-docker-on-myVM"
   publisher            = "Microsoft.OSTCExtensions"
   type                 = "CustomScriptForLinux"
   type_handler_version = "1.2"
 
-settings = <<SETTINGS
+  settings = <<SETTINGS
     {
-      "fileUris": ["https://raw.githubusercontent.com/rabikai/terraform-azurerm-securestorage/main/installDocker.sh"],
-      "commandToExecute": "./installDocker.sh"
+      "commandToExecute": "apt-get update ; apt-get install docker.io -y ; systemctl status docker"
     }
   SETTINGS
 }
